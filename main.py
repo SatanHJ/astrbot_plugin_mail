@@ -4,7 +4,7 @@ from astrbot.api import logger
 
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.0")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.1")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -125,6 +125,7 @@ class MyPlugin(Star):
             mail.select("INBOX")
             status, messages = mail.search(None, filter_type)
             mail_ids = messages[0].split()
+            logger.info(f"搜索未读邮件,关键词{filter_keyword},类型{filter_type},邮件数量{len(mail_ids)}")
 
             keywords = filter_keyword.split(",")
             mails = []
