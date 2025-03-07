@@ -5,7 +5,7 @@ from astrbot.api.message_components import File
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.9")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.10")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -332,9 +332,13 @@ class MyPlugin(Star):
         reply_message = f"找到{len(mails)}封关键词中有{filter_keyword}的邮件\n"
         for mail in mails:
             reply_message += f"=========={mail['subject']}==========\n"
+            reply_message += f"ID: {mail['id']}\n"
             reply_message += f"发件人: {mail['from']}\n"
             reply_message += f"日期: {mail['date']}\n"
             reply_message += f"正文: \n{mail['body']}\n"
+            reply_message += (
+                f"是否有附件: {'有' if mail['has_attachment'] else '没有'}\n"
+            )
             reply_message += f"=========={mail['subject']}==========\n\n"
         yield event.plain_result(reply_message)
 
@@ -344,6 +348,7 @@ class MyPlugin(Star):
         event: AstrMessageEvent,
         mail_id: str = None,
     ):
+        """获取邮件附件"""
         if mail_id is None:
             yield event.plain_result("请输入邮件ID")
         else:
