@@ -5,7 +5,7 @@ from astrbot.api.message_components import File
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.11")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.12")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -261,7 +261,7 @@ class MyPlugin(Star):
 
                     mails.append(
                         {
-                            "id": mail_id,
+                            "id": mail_id.decode('utf-8') if isinstance(mail_id, bytes) else str(mail_id),
                             "subject": subject_str,
                             "from": from_str,
                             "to": to_str,
@@ -286,6 +286,10 @@ class MyPlugin(Star):
 
         try:
             mail = self.login_mail()
+            # 确保mail_id是bytes类型
+            if isinstance(mail_id, str):
+                mail_id = mail_id.encode('utf-8')
+            
             _, msg_data = mail.fetch(mail_id, "(RFC822)")
             raw_email = msg_data[0][1]
             msg = email.message_from_bytes(raw_email)
