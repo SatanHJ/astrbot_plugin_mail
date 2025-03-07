@@ -3,7 +3,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.5")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.6")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -254,12 +254,11 @@ class MyPlugin(Star):
         mails = self.query_mail(filter_keyword, filter_type)
         reply_message = f"找到{len(mails)}封关键词中有{filter_keyword}的邮件\n"
         for mail in mails:
-            reply_message += f"----------------------------------\n"
-            reply_message += f"主题: {mail['subject']}\n"
+            reply_message += f"=========={mail['subject']}==========\n"
             reply_message += f"发件人: {mail['from']}\n"
             reply_message += f"日期: {mail['date']}\n"
-            reply_message += f"正文: {mail['body']}\n"
-            reply_message += f"----------------------------------\n"
+            reply_message += f"正文: \n{mail['body']}\n"
+            reply_message += f"=========={mail['subject']}==========\n\n"
 
         yield event.plain_result(reply_message)
 
