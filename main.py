@@ -4,7 +4,7 @@ from astrbot.api import logger
 
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.3")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.4")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -152,12 +152,14 @@ class MyPlugin(Star):
                     else:
                         pass
 
+                    logger.info(f"邮件内容: {msg['Body']}")
+
                     mails.append({
                         'subject': subject_str,
                         'from': msg['From'],
                         'to': msg['To'],
                         'date': msg['Date'],
-                        'body': msg.get_payload(decode=True).decode(errors="ignore") if not msg.is_multipart() else None,
+                        'body': msg['Body'],
                         # 'attachments': attachments
                     })
             return mails
@@ -168,12 +170,6 @@ class MyPlugin(Star):
     @filter.command("mail_query")
     async def mail_query(self, event: AstrMessageEvent, filter_keyword: str = None, filter_type: str = "UNSEEN"):
         '''这是一个邮件查询指令'''
-        # user_name = event.get_sender_name() # 用户名
-        # message_str = event.message_str # 用户发的纯文本消息字符串
-        # message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
-        # logger.info(message_chain)
-        # yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
-        
         yield event.plain_result(f"查询关键词中有{filter_keyword}的邮件中，请稍后...")
         mails = self.query_mail(filter_keyword, filter_type)
         reply_message = f"找到{len(mails)}封关键词中有{filter_keyword}的邮件\n"
