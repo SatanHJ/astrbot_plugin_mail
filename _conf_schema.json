@@ -1,0 +1,24 @@
+{
+  "mail_address": {
+      "description": "邮箱地址",
+      "type": "string",
+      "hint": "请输入邮箱地址"
+  },
+  "mail_password": {
+      "description": "邮箱密码",
+      "type": "string",
+      "hint": "请输入邮箱密码"
+  },
+  "mail_host": {
+      "description": "邮箱服务器",
+      "type": "string",
+      "hint": "请输入邮箱服务器",
+      "default": "imap.qq.com"
+  },
+  "mail_port": {
+      "description": "邮箱端口",
+      "type": "int",
+      "hint": "请输入邮箱端口",
+      "default": 993
+  }
+}
