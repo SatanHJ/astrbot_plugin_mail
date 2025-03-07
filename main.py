@@ -4,7 +4,7 @@ from astrbot.api import logger
 
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.1")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.2")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -125,7 +125,6 @@ class MyPlugin(Star):
             mail.select("INBOX")
             status, messages = mail.search(None, filter_type)
             mail_ids = messages[0].split()
-            logger.info(f"搜索未读邮件,关键词{filter_keyword},类型{filter_type},邮件数量{len(mail_ids)}")
 
             keywords = filter_keyword.split(",")
             mails = []
@@ -166,16 +165,16 @@ class MyPlugin(Star):
             logger.debug(f"查询邮件失败: {e}")
             raise e
 
-    @filter.command("mail")
-    async def mail(self, event: AstrMessageEvent):
+    @filter.command("mail_query")
+    async def mail_query(self, event: AstrMessageEvent, filter_keyword: str = None, filter_type: str = "UNSEEN"):
         '''这是一个邮件查询指令'''
         # user_name = event.get_sender_name() # 用户名
-        message_str = event.message_str # 用户发的纯文本消息字符串
+        # message_str = event.message_str # 用户发的纯文本消息字符串
         # message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
         # logger.info(message_chain)
         # yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
-        mails = self.query_mail(message_str)
-        yield event.plain_result(f"找到{len(mails)}封关键词中有发票的邮件")
+        mails = self.query_mail(filter_keyword, filter_type)
+        yield event.plain_result(f"找到{len(mails)}封关键词中有{filter_keyword}的邮件")
 
     async def terminate(self):
         '''可选择实现 terminate 函数，当插件被卸载/停用时会调用。'''
