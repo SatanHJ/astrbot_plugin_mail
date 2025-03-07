@@ -5,7 +5,7 @@ from astrbot.api.message_components import File
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.10")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.11")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -24,7 +24,7 @@ class MyPlugin(Star):
             )
         else:
             self.mail = self.login_mail()
-            # self.test()
+            self.test()
 
     def login_mail(self):
         """登录邮箱"""
@@ -81,7 +81,12 @@ class MyPlugin(Star):
         """检查邮件是否包含附件"""
         if msg.is_multipart():
             for part in msg.walk():
-                if part.get_content_type() == "application/octet-stream":
+                if part.get_content_maintype() == "multipart":
+                    continue
+                if part.get("Content-Disposition") is None:
+                    continue
+                filename = part.get_filename()
+                if filename:
                     return True
         return False
 
@@ -303,7 +308,7 @@ class MyPlugin(Star):
     # 测试用
     def test(self):
         # self.get_mail_folders();
-        mails = self.query_mail("发票", "SEEN", "&UXZO1mWHTvZZOQ-/invoices")
+        mails = self.query_mail("发票", "UNSEEN", "&UXZO1mWHTvZZOQ-/invoices")
         reply_message = f"找到{len(mails)}封关键词中有发票的邮件\n"
         for mail in mails:
             reply_message += f"----------------------------------\n"
