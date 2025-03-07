@@ -5,7 +5,7 @@ from astrbot.api.message_components import File
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.12")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.13")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -275,7 +275,9 @@ class MyPlugin(Star):
             logger.debug(f"查询邮件失败: {e}")
             raise e
 
-    def get_attachment_file_by_id(self, mail_id: str):
+    def get_attachment_file_by_id(
+        self, mail_id: str, folder_name: str = "&UXZO1mWHTvZZOQ-/invoices"
+    ):
         """根据邮件ID获取附件"""
         try:
             import email
@@ -286,7 +288,9 @@ class MyPlugin(Star):
 
         try:
             mail = self.login_mail()
-            # 确保mail_id是bytes类型
+            mail.select(folder_name)
+
+            # 将字符串类型的mail_id转换为bytes类型
             if isinstance(mail_id, str):
                 mail_id = mail_id.encode('utf-8')
             
@@ -311,21 +315,23 @@ class MyPlugin(Star):
 
     # 测试用
     def test(self):
+        files = self.get_attachment_file_by_id('2', "&UXZO1mWHTvZZOQ-/invoices")
+        logger.info(files)
         # self.get_mail_folders();
-        mails = self.query_mail("发票", "UNSEEN", "&UXZO1mWHTvZZOQ-/invoices")
-        reply_message = f"找到{len(mails)}封关键词中有发票的邮件\n"
-        for mail in mails:
-            reply_message += f"----------------------------------\n"
-            reply_message += f"ID: {mail['id']}\n"
-            reply_message += f"主题: {mail['subject']}\n"
-            reply_message += f"发件人: {mail['from']}\n"
-            reply_message += f"日期: {mail['date']}\n"
-            reply_message += f"正文: {mail['body']}\n"
-            reply_message += (
-                f"是否有附件: {'有' if mail['has_attachment'] else '没有'}\n"
-            )
-            reply_message += f"----------------------------------\n"
-        logger.info(reply_message)
+        # mails = self.query_mail("发票", "UNSEEN", "&UXZO1mWHTvZZOQ-/invoices")
+        # reply_message = f"找到{len(mails)}封关键词中有发票的邮件\n"
+        # for mail in mails:
+        #     reply_message += f"----------------------------------\n"
+        #     reply_message += f"ID: {mail['id']}\n"
+        #     reply_message += f"主题: {mail['subject']}\n"
+        #     reply_message += f"发件人: {mail['from']}\n"
+        #     reply_message += f"日期: {mail['date']}\n"
+        #     reply_message += f"正文: {mail['body']}\n"
+        #     reply_message += (
+        #         f"是否有附件: {'有' if mail['has_attachment'] else '没有'}\n"
+        #     )
+        #     reply_message += f"----------------------------------\n"
+        # logger.info(reply_message)
 
     @filter.command("mail_query")
     async def mail_query(
@@ -356,13 +362,15 @@ class MyPlugin(Star):
         self,
         event: AstrMessageEvent,
         mail_id: str = None,
+        filter_type: str = "UNSEEN",
+        folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
     ):
         """获取邮件附件"""
         if mail_id is None:
             yield event.plain_result("请输入邮件ID")
         else:
             yield event.plain_result(f"正在获取附件，请稍后...")
-            files = self.get_attachment_file_by_id(mail_id)
+            files = self.get_attachment_file_by_id(mail_id, filter_type, folder_name)
             if len(files) > 0:
                 for file in files:
                     file = File(file["file_name"], file["file_path"])
