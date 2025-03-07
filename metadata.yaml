@@ -1,6 +1,6 @@
 name: mail # 这是你的插件的唯一识别名。
 desc: 一个邮件插件, 主要用于查询邮件 # 插件简短描述
 help: 输入 /mail help 查看邮件查询帮助。 # 插件的帮助信息
-version: v1.0.6 # 插件版本号
+version: v1.0.7 # 插件版本号
 author: DiGua # 作者
 repo: https://github.com/SatanHJ/astrbot_plugin_mail # 插件的仓库地址

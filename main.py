@@ -3,7 +3,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.6")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.7")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -45,6 +45,16 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"登陆失败: {e}")
             raise e
+    
+    def get_mail_folders(self):        
+        # 获取所有文件夹
+        status, folders = self.mail.list()
+        print("可用文件夹：")
+        for folder in folders:
+            folder_name = folder.decode().split(' "/" ')[1].strip('"')
+            print(folder_name)
+        
+        return folders
 
     def contains_keywords(self, msg, keywords):
         """检查邮件标题或正文中是否包含关键词"""
@@ -175,7 +185,7 @@ class MyPlugin(Star):
 
         return subject_str, from_str, to_str, body
 
-    def query_mail(self, filter_keyword: str = None, filter_type: str = "UNSEEN"):
+    def query_mail(self, filter_keyword: str = None, filter_type: str = "UNSEEN", folder_name: str = "INBOX"):
         """查询邮件"""
         try:
             import email
@@ -195,7 +205,7 @@ class MyPlugin(Star):
             mail = self.login_mail()
 
             # 搜索未读邮件
-            mail.select("INBOX")
+            mail.select(folder_name)
             status, messages = mail.search(None, filter_type)
             mail_ids = messages[0].split()
 
@@ -231,7 +241,8 @@ class MyPlugin(Star):
 
     # 测试用
     # def test(self):
-    #     mails = self.query_mail("发票")
+    #     # self.get_mail_folders();
+    #     mails = self.query_mail("发票", "UNSEEN", "&UXZO1mWHTvZZOQ-/invoices")
     #     reply_message = f"找到{len(mails)}封关键词中有发票的邮件\n"
     #     for mail in mails:
     #         reply_message += f"----------------------------------\n"
