@@ -1,9 +1,1 @@
-# helloworld
-
-AstrBot 插件模板
-
-A template plugin for AstrBot plugin feature
-
-# 支持
-
-[帮助文档](https://astrbot.app)
+# 一个邮件插件, 主要用于查询邮件
