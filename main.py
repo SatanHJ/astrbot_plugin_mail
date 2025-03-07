@@ -4,7 +4,7 @@ from astrbot.api import logger
 
 
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.2")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.3")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -173,8 +173,19 @@ class MyPlugin(Star):
         # message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
         # logger.info(message_chain)
         # yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
+        
+        yield event.plain_result(f"查询关键词中有{filter_keyword}的邮件中，请稍后...")
         mails = self.query_mail(filter_keyword, filter_type)
-        yield event.plain_result(f"找到{len(mails)}封关键词中有{filter_keyword}的邮件")
+        reply_message = f"找到{len(mails)}封关键词中有{filter_keyword}的邮件\n"
+        for mail in mails:
+            reply_message += f"----------------------------------\n"
+            reply_message += f"主题: {mail['subject']}\n"
+            reply_message += f"发件人: {mail['from']}\n"
+            reply_message += f"日期: {mail['date']}\n"
+            reply_message += f"正文: {mail['body']}\n"
+            reply_message += f"----------------------------------\n"
+
+        yield event.plain_result(reply_message)
 
     async def terminate(self):
         '''可选择实现 terminate 函数，当插件被卸载/停用时会调用。'''
