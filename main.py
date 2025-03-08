@@ -1,5 +1,5 @@
 import os
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
@@ -23,7 +23,7 @@ class MyPlugin(Star):
             )
         else:
             self.mail = self.login_mail()
-            self.test()
+            # self.test()
 
     def login_mail(self):
         """登录邮箱"""
