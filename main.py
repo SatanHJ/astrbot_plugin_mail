@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.8")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.9")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -303,9 +303,13 @@ class MyPlugin(Star):
         
         pdf_document = fitz.open(pdf_path)
         for i, page in enumerate(pdf_document):
-            pix = page.get_pixmap()
+            # 提高分辨率，设置更高的缩放因子
+            zoom_factor = 2.0  # 增加缩放因子以提高清晰度
+            matrix = fitz.Matrix(zoom_factor, zoom_factor)
+            pix = page.get_pixmap(matrix=matrix, alpha=False)
+            # 使用高质量PNG格式保存
             image_path = os.path.join(save_path, f"{pdf_name}_{i}.png")
-            pix.save(image_path)
+            pix.save(image_path, output="png")
             image_paths.append(image_path)
         pdf_document.close()
 
@@ -349,6 +353,14 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"获取附件失败: {e}")
             raise e
+
+    def clear_attachment(self):
+        """清除附件"""
+        save_path = self.get_attachment_path()
+        if os.path.exists(save_path):
+            for file in os.listdir(save_path):
+                os.remove(os.path.join(save_path, file))
+        return True
 
     # 测试用
     def test(self):
@@ -424,6 +436,16 @@ class MyPlugin(Star):
                 chain.append(Plain("没有找到附件"))
 
         yield event.chain_result(chain)
+
+    @filter.command("mail_clear_attachment")
+    async def mail_clear_attachment(
+        self,
+        event: AstrMessageEvent,
+    ):
+        """清除附件"""
+        yield event.plain_result("正在清除附件，请稍后...")
+        self.clear_attachment()
+        yield event.plain_result("附件清除完成")
         
     async def terminate(self):
         """可选择实现 terminate 函数，当插件被卸载/停用时会调用。"""
