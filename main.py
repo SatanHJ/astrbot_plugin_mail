@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.6")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.7")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -353,10 +353,10 @@ class MyPlugin(Star):
     # 测试用
     def test(self):
         files = self.get_attachment_file_by_id('2', "&UXZO1mWHTvZZOQ-/invoices")
-        # imgs = []
-        # for file in files:
-        #     imgs.extend(self.pdf_to_image(file["file_name"], file["file_path"]))
-        # logger.info(imgs)
+        imgs = []
+        for file in files:
+            imgs.extend(self.pdf_to_image(file["file_name"], file["file_path"]))
+        logger.info(imgs)
 
         # logger.info(imgs)
         # self.get_mail_folders();
@@ -417,6 +417,7 @@ class MyPlugin(Star):
             if len(files) > 0:
                 chain.append(Plain("附件如下："))
                 for file in files:
+                    chain.append(Plain(f"附件名称：{file['file_name']}，附件路径：{file['file_path']}"))
                     chain.append(Image.fromFileSystem(file["file_path"]))
             else:
                 chain.append(Plain("没有找到附件"))
