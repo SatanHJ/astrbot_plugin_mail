@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.3")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.4")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -312,7 +312,7 @@ class MyPlugin(Star):
         return image_paths
 
     def get_attachment_file_by_id(
-        self, mail_id: str, folder_name: str = "&UXZO1mWHTvZZOQ-/invoices"
+        self, mail_id: str | int, folder_name: str = "&UXZO1mWHTvZZOQ-/invoices"
     ):
         """根据邮件ID获取附件"""
         try:
@@ -331,6 +331,8 @@ class MyPlugin(Star):
             logger.info(f"mail_id type: {type(mail_id)}")
             if isinstance(mail_id, str):
                 mail_id = mail_id.encode('utf-8')
+            elif isinstance(mail_id, int):
+                mail_id = str(mail_id).encode('utf-8')
             
             _, msg_data = mail.fetch(mail_id, "(RFC822)")
             raw_email = msg_data[0][1]
@@ -404,7 +406,7 @@ class MyPlugin(Star):
     async def mail_get_attachment(
         self,
         event: AstrMessageEvent,
-        mail_id: str | None = None,
+        mail_id: int | None = None,
         folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
     ):
         """获取邮件附件"""
