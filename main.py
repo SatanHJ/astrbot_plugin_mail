@@ -1,10 +1,10 @@
 import os
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
-from astrbot.api.message_components import Image
+from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.14")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.15")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -407,17 +407,21 @@ class MyPlugin(Star):
         folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
     ):
         """获取邮件附件"""
+        yield event.plain_result("正在获取附件，请稍后...")
+
+        chain = []
         if mail_id is None:
-            yield event.plain_result("请输入邮件ID")
+            chain.append(Plain("请输入邮件ID"))
         else:
-            yield event.plain_result(f"正在获取附件，请稍后...")
             files = self.get_attachment_file_by_id(mail_id, filter_type, folder_name)
             if len(files) > 0:
                 for file in files:
-                    yield event.make_result().message(file["file_name"]).file_image(file["file_path"])
+                    chain.append(Image.fromFileSystem(file["file_path"]))
             else:
-                yield event.plain_result("没有找到附件")
+                chain.append(Plain("没有找到附件"))
 
+        yield event.chain_result(chain)
+        
     async def terminate(self):
         """可选择实现 terminate 函数，当插件被卸载/停用时会调用。"""
         self.mail.close()
