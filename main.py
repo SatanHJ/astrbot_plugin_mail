@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.2")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.3")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -23,7 +23,7 @@ class MyPlugin(Star):
             )
         else:
             self.mail = self.login_mail()
-            # self.test()
+            self.test()
 
     def login_mail(self):
         """登录邮箱"""
@@ -327,6 +327,8 @@ class MyPlugin(Star):
             mail.select(folder_name)
 
             # 将字符串类型的mail_id转换为bytes类型
+            # 输出mail_id的类型
+            logger.info(f"mail_id type: {type(mail_id)}")
             if isinstance(mail_id, str):
                 mail_id = mail_id.encode('utf-8')
             
@@ -352,10 +354,10 @@ class MyPlugin(Star):
     # 测试用
     def test(self):
         files = self.get_attachment_file_by_id('2', "&UXZO1mWHTvZZOQ-/invoices")
-        imgs = []
-        for file in files:
-            imgs.extend(self.pdf_to_image(file["file_name"], file["file_path"]))
-        logger.info(imgs)
+        # imgs = []
+        # for file in files:
+        #     imgs.extend(self.pdf_to_image(file["file_name"], file["file_path"]))
+        # logger.info(imgs)
 
         # logger.info(imgs)
         # self.get_mail_folders();
