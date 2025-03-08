@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.7")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.8")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -277,7 +277,7 @@ class MyPlugin(Star):
             logger.debug(f"查询邮件失败: {e}")
             raise e
 
-    def pdf_to_image(self, pdf_name: str, pdf_path: str):
+    def pdf_to_image(self, pdf_name: str, pdf_path: str) -> list[str]: 
         """将PDF转换为图片"""
         try:
             import fitz  # PyMuPDF
@@ -415,10 +415,11 @@ class MyPlugin(Star):
         else:
             files = self.get_attachment_file_by_id(mail_id, folder_name)
             if len(files) > 0:
-                chain.append(Plain("附件如下："))
                 for file in files:
-                    chain.append(Plain(f"附件名称：{file['file_name']}，附件路径：{file['file_path']}"))
-                    chain.append(Image.fromFileSystem(file["file_path"]))
+                    imgs = self.pdf_to_image(file["file_name"], file["file_path"])
+                    for img in imgs:
+                        chain.append(Plain(f"附件名称：{file['file_name']}"))
+                        chain.append(Image.fromFileSystem(img))
             else:
                 chain.append(Plain("没有找到附件"))
 
