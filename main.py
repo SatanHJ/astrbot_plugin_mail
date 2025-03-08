@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.5")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.6")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -415,12 +415,13 @@ class MyPlugin(Star):
         else:
             files = self.get_attachment_file_by_id(mail_id, folder_name)
             if len(files) > 0:
+                chain.append(Plain("附件如下："))
                 for file in files:
                     chain.append(Image.fromFileSystem(file["file_path"]))
             else:
                 chain.append(Plain("没有找到附件"))
 
-        yield event.plain_result(chain)
+        yield event.chain_result(chain)
         
     async def terminate(self):
         """可选择实现 terminate 函数，当插件被卸载/停用时会调用。"""
