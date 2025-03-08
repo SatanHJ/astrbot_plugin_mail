@@ -398,29 +398,29 @@ class MyPlugin(Star):
             reply_message += f"=========={mail['subject']}==========\n\n"
         yield event.plain_result(reply_message)
 
-    @filter.command("mail_get_attachment")
-    async def mail_get_attachment(
-        self,
-        event: AstrMessageEvent,
-        mail_id: str = None,
-        filter_type: str = "UNSEEN",
-        folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
-    ):
-        """获取邮件附件"""
-        yield event.plain_result("正在获取附件，请稍后...")
+    # @filter.command("mail_get_attachment")
+    # async def mail_get_attachment(
+    #     self,
+    #     event: AstrMessageEvent,
+    #     mail_id: str = None,
+    #     filter_type: str = "UNSEEN",
+    #     folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
+    # ):
+    #     """获取邮件附件"""
+    #     yield event.plain_result("正在获取附件，请稍后...")
 
-        chain = []
-        if mail_id is None:
-            chain.append(Plain("请输入邮件ID"))
-        else:
-            files = self.get_attachment_file_by_id(mail_id, filter_type, folder_name)
-            if len(files) > 0:
-                for file in files:
-                    chain.append(Image.fromFileSystem(file["file_path"]))
-            else:
-                chain.append(Plain("没有找到附件"))
+    #     chain = []
+    #     if mail_id is None:
+    #         chain.append(Plain("请输入邮件ID"))
+    #     else:
+    #         files = self.get_attachment_file_by_id(mail_id, filter_type, folder_name)
+    #         if len(files) > 0:
+    #             for file in files:
+    #                 chain.append(Image.fromFileSystem(file["file_path"]))
+    #         else:
+    #             chain.append(Plain("没有找到附件"))
 
-        yield event.chain_result(chain)
+    #     yield event.chain_result(chain)
         
     async def terminate(self):
         """可选择实现 terminate 函数，当插件被卸载/停用时会调用。"""
