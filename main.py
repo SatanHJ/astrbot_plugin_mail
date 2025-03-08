@@ -4,7 +4,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api.message_components import Image, Plain
 from astrbot.api import logger
 
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.0")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.1.1")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -222,7 +222,7 @@ class MyPlugin(Star):
 
     def query_mail(
         self,
-        filter_keyword: str = None,
+        filter_keyword: str | None = None,
         filter_type: str = "UNSEEN",
         folder_name: str = "INBOX",
     ):
@@ -378,7 +378,7 @@ class MyPlugin(Star):
     async def mail_query(
         self,
         event: AstrMessageEvent,
-        filter_keyword: str = "",
+        filter_keyword: str | None = None,
         filter_type: str = "UNSEEN",
         folder_name: str = "&UXZO1mWHTvZZOQ-/invoices",
     ):
