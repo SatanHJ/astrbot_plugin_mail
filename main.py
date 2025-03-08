@@ -1,11 +1,10 @@
 import os
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
-from astrbot.api.message_components import File
+from astrbot.api.message_components import Image
 from astrbot.api import logger
 
-
-@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.13")
+@register("astrbot_plugin_mail", "mail", "一个邮件插件, 主要用于查询邮件", "1.0.14")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: dict):
         try:
@@ -137,18 +136,21 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"获取邮件附件失败: {e}")
             raise e
-
-    def save_attachment(self, attachment, save_path=None):
+        
+    def get_attachment_path(self):
+        """获取附件路径"""
+        save_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "attachments"
+        )
+        if not os.path.exists(save_path):
+            os.makedirs(save_path, exist_ok=True)
+        return save_path
+    
+    def save_attachment(self, attachment):
         """保存附件到指定路径"""
         try:
-            if save_path is None:
-                # 默认保存到插件目录下的attachments文件夹
-                save_path = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), "attachments"
-                )
-                os.makedirs(save_path, exist_ok=True)
-
-            file_path = os.path.join(save_path, attachment["filename"])
+            path = self.get_attachment_path()
+            file_path = os.path.join(path, attachment["filename"])
 
             # 如果文件已存在，则直接输出
             if os.path.exists(file_path):
@@ -275,6 +277,40 @@ class MyPlugin(Star):
             logger.debug(f"查询邮件失败: {e}")
             raise e
 
+    def pdf_to_image(self, pdf_name: str, pdf_path: str):
+        """将PDF转换为图片"""
+        try:
+            import fitz  # PyMuPDF
+        except ImportError:
+            raise Exception(
+                "PyMuPDF 模块未安装，请前往管理面板->控制台->安装pip库 安装 PyMuPDF 这个库"
+            )
+        
+        image_paths = []
+        save_path = os.path.join(self.get_attachment_path())
+        if not os.path.exists(save_path):
+            os.makedirs(save_path, exist_ok=True)
+
+        # 检查文件是否已存在，如果存在则直接返回
+        if os.path.exists(save_path) and len(os.listdir(save_path)) > 0:
+            # 获取已存在的图片路径
+            for file_name in sorted(os.listdir(save_path)):
+                if file_name.endswith('.png'):
+                    image_paths.append(os.path.join(save_path, file_name))
+            if image_paths:
+                logger.debug(f"PDF已转换过图片，直接返回已有图片: {len(image_paths)}张")
+                return image_paths
+        
+        pdf_document = fitz.open(pdf_path)
+        for i, page in enumerate(pdf_document):
+            pix = page.get_pixmap()
+            image_path = os.path.join(save_path, f"{pdf_name}_{i}.png")
+            pix.save(image_path)
+            image_paths.append(image_path)
+        pdf_document.close()
+
+        return image_paths
+
     def get_attachment_file_by_id(
         self, mail_id: str, folder_name: str = "&UXZO1mWHTvZZOQ-/invoices"
     ):
@@ -316,7 +352,12 @@ class MyPlugin(Star):
     # 测试用
     def test(self):
         files = self.get_attachment_file_by_id('2', "&UXZO1mWHTvZZOQ-/invoices")
-        logger.info(files)
+        imgs = []
+        for file in files:
+            imgs.extend(self.pdf_to_image(file["file_name"], file["file_path"]))
+        logger.info(imgs)
+
+        # logger.info(imgs)
         # self.get_mail_folders();
         # mails = self.query_mail("发票", "UNSEEN", "&UXZO1mWHTvZZOQ-/invoices")
         # reply_message = f"找到{len(mails)}封关键词中有发票的邮件\n"
@@ -373,8 +414,7 @@ class MyPlugin(Star):
             files = self.get_attachment_file_by_id(mail_id, filter_type, folder_name)
             if len(files) > 0:
                 for file in files:
-                    file = File(file["file_name"], file["file_path"])
-                    yield event.chain_result(file)
+                    yield event.make_result().message(file["file_name"]).file_image(file["file_path"])
             else:
                 yield event.plain_result("没有找到附件")
 
